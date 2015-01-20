@@ -1,23 +1,39 @@
-var async = require('async'),
-    fs = require('fs');
+var should = require('chai').should(),
+    assert = require('chai').assert;
 
-var channel_has_properties = require('./channel_properties');
-chpath = "/Users/azu-lito/_Azuqua/modules/channel_json/zendesk.json";
-channel = JSON.parse(fs.readFileSync(chpath));
-channel_has_properties(channel);
+var method_has_properties = require('./method');
+var auth = require('./auth');
 
+module.exports = function(channel) {
+  describe("Properties of each channel", function() {
+    it(channel.name+"'s basic properties", function() {
+      assert(channel.name !== undefined, "name");
+      assert(channel.description !== undefined, "description");
+      assert(channel.version !== undefined, "version");
+      assert(channel.creator !== undefined, "creator");
+      channel.creator.should.be.an('object');
+      assert(channel.type !== undefined, "type");
+      assert(channel.auth !== undefined, "auth");
+      channel.auth.should.be.an('object');
+      assert(channel.recurrence !== undefined, "recurrence");
+      assert(channel.dependencies !== undefined, "dependencies");
+      channel.dependencies.should.be.an('object');
+      assert(channel.methods !== undefined, "methods");
+      channel.methods.should.be.an('array');
 
-/* Test ALL the channels
-// Load channels
-var PATH = "/Users/azu-lito/_Azuqua/modules/channel_json/";
-var channels = [];
-fs.readdirSync(PATH).forEach(function(filepath){
-  filepath = PATH + filepath;
-  var ch = fs.readFileSync(filepath);
-  channels.push(JSON.parse(ch));
-});
+    });
 
-async.each(channels, function(channel){
-  channel_has_properties(channel);
-});
-*/
+    // Run a similar check on methods
+    describe("Each method of "+channel.name, function(){
+      channel.methods.forEach(function(method){
+        method_has_properties(method);
+      });
+    });
+
+    describe(channel.name+" auth", function(){
+      channel.methods.forEach(function(method){
+        method_has_properties(method);
+      });
+    });
+  });
+};
