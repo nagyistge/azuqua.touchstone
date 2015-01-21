@@ -1,11 +1,6 @@
-To Do:
-Syntax Checking
-    - single channel
-    - all channels
+Touchstone
+----------
 
-HTTP mock tests for zebricks
-    - input, expected
+External channel testing framework
 
-Can test method-by-method or whole channel
-
-How to test since? webhooks?
+`mocha` to run all tests.
