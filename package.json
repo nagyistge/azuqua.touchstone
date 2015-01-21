@@ -5,9 +5,9 @@
   "description": "",
   "private": true,
   "main": "index",
-  "dependencies": {
-  },
   "devDependencies": {
+  },
+  "dependencies": {
     "chai": "*",
     "leche": "*",
     "mocha": "*",

@@ -1,7 +1,9 @@
 // look up all of the properties of auth accessed
 // expose them to the user at test-time
 // verify that they all exist in auth
-assert = require('chai').assert;
+var assert = require('chai').assert;
+
+var HashSet = require('../../lib/HashSet');
 
 searchAuthProperties = function(channelString){
   assert(typeof(channelString) === "string", "Argument must be string");
@@ -54,15 +56,26 @@ expectedProperties = function(auth){
   }
 };
 
-module.exports.verifyAuth = function(channelJson) {
-  it("has expected auth properties", function(){
-    var used = new HashSet(searchAuthProperties), 
-        available = new HashSet(expectedProperties);
+module.exports.verifyUsedProperties = function(channelJson) {
+  it("uses only auth properties it has", function(){
+    var used = new HashSet(searchAuthProperties(JSON.stringify(channelJson))), 
+        available = new HashSet(expectedProperties(channelJson.auth));
 
-    var unavailable = used.subtract(available);
-    assert(unavailable.empty, 
-      "found used properties "+unavailable.toString+
-      "that don't exist in 'Auth'");
+    var unavailable = used.difference(available);
+    assert(unavailable.isEmpty(), 
+      "found used properties "+unavailable.toString()+
+      " that don't exist in 'Auth'");
+  });
+};
+
+module.exports.verifyRequiredProperties = function(channelJson) {
+  it("has expected auth properties", function(){
+    var expected = new HashSet(expectedProperties(JSON.stringify(channelJson))), 
+        actual = new HashSet(Object.keys(channelJson.auth));
+
+    var missing = expected.difference(actual);
+    assert(missing.isEmpty(), 
+      "Missing the following properties"+missing.toString()+" in Auth.");
   });
 };
 

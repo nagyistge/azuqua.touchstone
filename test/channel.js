@@ -23,6 +23,10 @@ module.exports = function(channel) {
 
     });
 
+    describe(channel.name+" Auth", function(){
+      auth(channel);
+    });
+
     // Run a similar check on methods
     describe("Each method of "+channel.name, function(){
       channel.methods.forEach(function(method){
@@ -30,10 +34,5 @@ module.exports = function(channel) {
       });
     });
 
-    describe(channel.name+" auth", function(){
-      channel.methods.forEach(function(method){
-        method_has_properties(method);
-      });
-    });
   });
 };
