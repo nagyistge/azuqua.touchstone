@@ -1,4 +1,5 @@
 module.exports = function(input){
-  it("", function(){
+  it("unwritten test", function(){
+    throw new Error("To Do");
   });
 };
