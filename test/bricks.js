@@ -1,5 +1,6 @@
 var should = require('chai').should(),
-    assert = require('chai').assert;
+    assert = require('chai').assert,
+    isSchema = require('schema-is-schema');
 
 var HashSet = require('../lib/HashSet');
 
@@ -54,6 +55,12 @@ module.exports = {
       assert(brick.brick !== undefined, "brick");
       assert(brick.config !== undefined, "config");
     });
+
+    it("has recognized methods", function(){
+      var collection_methods = ["map", "filterGt", "flatten", "each", "limit"];
+      assert(collection_methods.indexOf(brick.config.method) > -1, 
+        "Collection method not recognized");
+    });
   },
 
   "signal": function(brick){
@@ -74,6 +81,12 @@ module.exports = {
     it("has the required properties", function(){
       assert(brick.brick !== undefined, "brick");
       assert(brick.config !== undefined, "config");
+      assert(brick.config.schema !== undefined, "config.schema");
+    });
+
+    it("schema is a valid JSON-schema", function(){
+      assert(isSchema(brick.config.schema), 
+        "config.schema is not a valid JSON schema");
     });
   },
 

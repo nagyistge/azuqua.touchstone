@@ -5,13 +5,13 @@
   "description": "",
   "private": true,
   "main": "index",
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "dependencies": {
+    "async": "*",
     "chai": "*",
     "leche": "*",
     "mocha": "*",
-    "async": "*"
+    "schema-is-schema": "^1.2.2"
   },
   "repository": {
     "type": "git",
@@ -21,4 +21,3 @@
     "node": "0.10.x"
   }
 }
-
