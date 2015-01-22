@@ -5,7 +5,7 @@ var assert = require('chai').assert;
 
 var HashSet = require('../../lib/HashSet');
 
-searchAuthProperties = function(channelString){
+function searchAuthProperties(channelString){
   assert(typeof(channelString) === "string", "Argument must be string");
   var regex = /{{auth\.[^\{\}]+}}/gi;
   return channelString.match(regex).map(
@@ -17,9 +17,9 @@ searchAuthProperties = function(channelString){
         return self.indexOf(item) == pos;
       }
     );
-};
+}
 
-expectedProperties = function(auth){
+function expectedProperties(auth){
   switch (auth.type){
     case "oauth":
       if (auth.version === "2.0"){
@@ -54,7 +54,7 @@ expectedProperties = function(auth){
     case "custom":
       return Object.keys(auth.authparams);
   }
-};
+}
 
 module.exports.verifyUsedProperties = function(channelJson) {
   it("uses only auth properties it has", function(){

@@ -6,7 +6,7 @@ var zebrick_has_properties = require('./zebrick'),
     output_has_properties = require('./output'),
     params_has_properties = require('./params');
 
-module.exports = function(method) {
+module.exports = function(method, channel) {
   describe(method.name, function() {
     it("has basic properties", function(){
       assert(method.name !== undefined, "name");
@@ -26,9 +26,9 @@ module.exports = function(method) {
       });
     }
 
-    if (method.output) {
+    if (method.params) {
       describe("params", function(){
-        params_has_properties(method);
+        params_has_properties(method, channel);
       });
     }
 
