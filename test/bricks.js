@@ -5,7 +5,7 @@ var should = require('chai').should(),
 var HashSet = require('../lib/HashSet');
 
 module.exports = {
-  "http": function(brick){
+  "http": function(brick, isExternal){
     it("has the required properties", function(){
       assert(brick.brick !== undefined, "brick");
       assert(brick.config !== undefined, "config");
@@ -36,7 +36,12 @@ module.exports = {
     });
   },
 
-  "custom": function(brick){
+  "custom": function(brick, isExternal){
+    if (isExternal){
+      throw new Error("'Custom' bricks are not supported in "+
+                      "non-Azuqua channels");
+    }
+
     it("has the required properties", function(){
       assert(brick.brick !== undefined, "brick");
       assert(brick.config !== undefined, "config");

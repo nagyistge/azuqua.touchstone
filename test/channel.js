@@ -4,7 +4,7 @@ var should = require('chai').should(),
 var method_has_properties = require('./method');
 var auth = require('./auth');
 
-module.exports = function(channel) {
+module.exports = function(channel, isExternal) {
   describe("Properties of each channel", function() {
     it(channel.name+"'s basic properties", function() {
       assert(channel.name !== undefined, "name");
@@ -30,7 +30,7 @@ module.exports = function(channel) {
     // Run a similar check on methods
     describe("Each method of "+channel.name, function(){
       channel.methods.forEach(function(method){
-        method_has_properties(method, channel);
+        method_has_properties(method, channel, isExternal);
       });
     });
 

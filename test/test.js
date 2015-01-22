@@ -1,10 +1,11 @@
 var async = require('async'),
     fs = require('fs');
 
-var channel_has_properties = require('./channel');
-chpath = "/Users/azu-lito/_Azuqua/modules/channel_json/zendesk.json";
-channel = JSON.parse(fs.readFileSync(chpath));
-channel_has_properties(channel);
+var testFramework = require('../');
+
+var chpath = "/Users/azu-lito/_Azuqua/modules/channel_json/zendesk.json";
+var channel = fs.readFileSync(chpath);
+testFramework(channel);
 
 
 /* Test ALL the channels

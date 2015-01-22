@@ -1,5 +1,6 @@
-module.exports = function(channel, external){
-  if (extenal) {
-  } else {
-  }
+var channel_has_properties = require('./test/channel');
+
+module.exports = function(channelText, isExternal){
+  var channel = JSON.parse(channelText);
+  channel_has_properties(channel, isExternal);
 };

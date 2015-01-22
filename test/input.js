@@ -14,6 +14,7 @@ function searchInput(zebricksString){
       }
     );
 }
+
 function getInputs(input) {
   var ret = [];
   input.attributes.forEach(function(klass){
