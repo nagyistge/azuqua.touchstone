@@ -37,12 +37,14 @@ module.exports = {
   },
 
   "custom": function(brick, isExternal){
-    if (isExternal){
-      throw new Error("'Custom' bricks are not supported in "+
-                      "non-Azuqua channels");
-    }
+    it("is an internal use of a custom brick", function(){
+      if (isExternal){
+        throw new Error("'Custom' bricks are not supported in "+
+                        "non-Azuqua channels");
+      }
+    });
 
-    it("has the required properties", function(){
+    it("has the required properties (please test on your own!)", function(){
       assert(brick.brick !== undefined, "brick");
       assert(brick.config !== undefined, "config");
     }); // that's all we can say about custom; config is user-determined
