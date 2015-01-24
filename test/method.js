@@ -8,11 +8,12 @@ var zebrick_has_properties = require('./zebrick'),
 
 module.exports = function(method, channel, isExternal) {
   describe(method.name, function() {
-    it("has basic properties", function(){
+    it("has basic properties", function(done){
       assert(method.name !== undefined, "name");
       assert(method.description !== undefined, "description");
       assert(method.kind !== undefined, "kind");
       assert(method.zebricks !== undefined, "zebricks");
+      done();
     });
 
     if (method.input) {
@@ -35,9 +36,10 @@ module.exports = function(method, channel, isExternal) {
     // Test a method's zebricks
     if (!Array.isArray(method.zebricks)) {
       describe("object-style zebrick"+method.name, function(){
-        it("has webhook properties", function() {
+        it("has webhook properties", function(done) {
           assert(method.zebricks.start !== undefined, "webhooks start");
           assert(method.zebricks.start !== undefined, "webhooks stop");
+          done();
         });
       });
 

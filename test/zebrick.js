@@ -27,14 +27,16 @@ function valid_brick(brickname) {
 }
 
 module.exports = function(zebrick, isExternal) {
-  it("has a recognized brick", function() {
+  it("has a recognized brick", function(done) {
     assert(zebrick.brick !== undefined, "brick DNE");
     assert(valid_brick(zebrick.brick), "found unknown brick "+zebrick.brick);
+    done();
   });
 
-  it("has a config", function() {
+  it("has a config", function(done) {
     assert(zebrick.config !== undefined, "config");
     zebrick.config.should.be.an('object');
+    done();
   });
 
   describe("the "+zebrick.brick+" brick", function() {

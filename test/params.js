@@ -28,16 +28,17 @@ function getParams(params) {
 
 
 module.exports = function(method){
-  it("params is non-empty", function(){
+  it("params is non-empty", function(done){
     assert(method.params.length !== 0, 
       "params array is empty (just remove params completely)"
     );
+    done();
   });
 
   describe("the structure of params",function(){
     method.params.forEach(function(dict){
         var klass = Object.keys(dict)[0];
-        it("has basic properties",function(){
+        it("has basic properties",function(done){
             assert(dict[klass].type !== undefined, 
               "params."+klass+"missing type"
           );
@@ -49,9 +50,10 @@ module.exports = function(method){
               "option type params."+klass+"missing choices"
             );
           }
+          done();
         });
         if (dict[klass].lookup !== undefined) {
-          it("has metadata", function(){
+          it("has metadata", function(done){
             assert(dict[klass].lookup.channel !== undefined, 
               "metadata type params."+klass+"missing lookup.channel"
             );
@@ -64,18 +66,20 @@ module.exports = function(method){
             assert(dict[klass].lookup.operation !== undefined, 
               "metadata type params."+klass+"missing lookup.operation"
             );
+            done();
           });
         } else {
-          it("uses only params it has", function(){
+          it("uses only params it has", function(done){
               var used = new HashSet(
                     searchParams(JSON.stringify(method.zebricks))
                   ), 
                   available = new HashSet(getParams(method.params));
-
               var unavailable = used.difference(available);
+
               assert(unavailable.isEmpty(), 
                   "found used properties '"+unavailable.toString()+
                   "' that don't exist in 'Params'");
+              done();
           });
       }
     });

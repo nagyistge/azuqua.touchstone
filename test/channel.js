@@ -6,7 +6,7 @@ var auth = require('./auth');
 
 module.exports = function(channel, isExternal) {
   describe("Properties of each channel", function() {
-    it(channel.name+"'s basic properties", function() {
+    it(channel.name+"'s basic properties", function(done) {
       assert(channel.name !== undefined, "name");
       assert(channel.description !== undefined, "description");
       assert(channel.version !== undefined, "version");
@@ -21,6 +21,7 @@ module.exports = function(channel, isExternal) {
       assert(channel.methods !== undefined, "methods");
       channel.methods.should.be.an('array');
 
+      done();
     });
 
     describe(channel.name+" Auth", function(){

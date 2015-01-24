@@ -3,7 +3,7 @@ var async = require('async'),
 
 var testFramework = require('../');
 
-var chpath = "/Users/azu-lito/_Azuqua/modules/channel_json/zendesk.json";
+var chpath = "/Users/azu-lito/_Azuqua/modules/definition/marketo.json";
 var channel = fs.readFileSync(chpath);
 testFramework(channel, false);
 
