@@ -6,7 +6,7 @@ var zebrick_has_properties = require('./zebrick'),
     output_has_properties = require('./output'),
     params_has_properties = require('./params');
 
-module.exports = function(method, channel, isExternal) {
+module.exports = function(method, channel, isInternal) {
   describe(method.name, function() {
     it("has basic properties", function(done){
       assert(method.name !== undefined, "name");
@@ -46,7 +46,7 @@ module.exports = function(method, channel, isExternal) {
     } else {
       describe("Each zebrick of "+method.name, function(){
         method.zebricks.forEach(function(zebrick){
-          zebrick_has_properties(zebrick, isExternal);
+          zebrick_has_properties(zebrick, isInternal);
         });
       });
     }

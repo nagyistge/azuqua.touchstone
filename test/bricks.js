@@ -5,7 +5,7 @@ var should = require('chai').should(),
 var HashSet = require('../lib/HashSet');
 
 module.exports = {
-  "http": function(brick, isExternal){
+  "http": function(brick, isInternal){
     it("has the required properties", function(done){
       assert(brick.brick !== undefined, "brick");
       assert(brick.config !== undefined, "config");
@@ -14,31 +14,28 @@ module.exports = {
       done();
     });
 
-    it("uses only auth properties it has", function(done){
+    it("uses valid config properties", function(done){
       var available = new HashSet([
-        "sinceFormat",
         "method",
         "url",
         "auth",
         "query",
         "headers",
-        "body",
-        "scopeResponse",
-        "wrapResponse"
-        ]), 
+        "body"
+        ]),
           used = new HashSet(Object.keys(brick.config));
 
       var unavailable = used.difference(available);
-      assert(unavailable.isEmpty(), 
+      assert(unavailable.isEmpty(),
         "found used properties "+unavailable.toString()+
         " that don't exist in the http brick");
       done();
     });
   },
 
-  "custom": function(brick, isExternal){
+  "custom": function(brick, isInternal){
     it("is an internal use of a custom brick", function(done){
-      if (isExternal){
+      if (!isInternal){
         throw new Error("'Custom' bricks are not supported in "+
                         "non-Azuqua channels");
       }
@@ -69,7 +66,7 @@ module.exports = {
 
     it("has recognized methods", function(done){
       var collection_methods = ["map", "filterGt", "flatten", "each", "limit"];
-      assert(collection_methods.indexOf(brick.config.operation) > -1, 
+      assert(collection_methods.indexOf(brick.config.operation) > -1,
         "Collection method not recognized");
       done();
     });
@@ -83,10 +80,51 @@ module.exports = {
     });
   },
 
-  "shapify": function(brick){
+  "wrap": function(brick){
     it("has the required properties", function(done){
       assert(brick.brick !== undefined, "brick");
       assert(brick.config !== undefined, "config");
+      assert(brick.config.in !== undefined, "config.in");
+      done();
+    });
+  },
+
+  "scope": function(brick){
+    it("has the required properties", function(done){
+      assert(brick.brick !== undefined, "brick");
+      assert(brick.config !== undefined, "config");
+      assert(brick.config.path !== undefined, "config.path");
+      done();
+    });
+  },
+
+  "dateslice": function(brick){
+    it("has the required properties", function(done){
+      assert(brick.brick !== undefined, "brick");
+      assert(brick.config !== undefined, "config");
+      assert(brick.config.path !== undefined, "config.date");
+      assert(brick.config.path !== undefined, "config.path");
+      done();
+    });
+  },
+
+  "shapify": function(brick){
+    it("has the required properties", function(done){
+      assert(false, "The Shapify brick is deprecated: please use Massage");
+      done();
+    });
+  },
+
+  "since": function(brick){
+    it("has the required properties", function(done){
+      assert(brick.brick !== undefined, "brick");
+      assert(brick.config !== undefined, "config");
+      assert(brick.config.format !== undefined, "config.format");
+      assert(brick.config.path !== undefined, "config.path");
+      assert(brick.config.invalid !== undefined, "config.invalid");
+      assert(Array.isArray(brick.config.invalid),
+        "config.invalid should be array"
+      );
       done();
     });
   },
@@ -100,7 +138,7 @@ module.exports = {
     });
 
     it("schema is a valid JSON-schema", function(done){
-      assert(isSchema(brick.config.schema), 
+      assert(isSchema(brick.config.schema),
         "config.schema is not a valid JSON schema");
       done();
     });

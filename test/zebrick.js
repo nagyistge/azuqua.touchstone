@@ -26,7 +26,7 @@ function valid_brick(brickname) {
   }
 }
 
-module.exports = function(zebrick, isExternal) {
+module.exports = function(zebrick, isInternal) {
   it("has a recognized brick", function(done) {
     assert(zebrick.brick !== undefined, "brick DNE");
     assert(valid_brick(zebrick.brick), "found unknown brick "+zebrick.brick);
@@ -40,6 +40,6 @@ module.exports = function(zebrick, isExternal) {
   });
 
   describe("the "+zebrick.brick+" brick", function() {
-    bricks[zebrick.brick](zebrick, isExternal);
+    bricks[zebrick.brick](zebrick, isInternal);
   });
 };
