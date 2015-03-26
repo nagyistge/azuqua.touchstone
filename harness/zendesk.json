@@ -1,0 +1,388 @@
+{
+  "name": "Zendesk",
+  "description": "Zendesk Channel",
+  "version": "0.3.2",
+  "creator": {
+    "name": "Azuqua",
+    "url": "/market/azuqua"
+  },
+  "type": "channel",
+  "recurrence": 1,
+  "dependencies": {
+    "$custom": "../definition/zendesk/custom"
+  },
+  "auth": {
+    "type": "basic",
+    "authparams": {
+      "subdomain": {
+        "type": "string",
+        "name": "Zendesk subdomain",
+        "description": "Your Zendesk subdomain"
+      },
+      "username": {
+        "type": "string",
+        "name": "Email address",
+        "description": "Your user email"
+      },
+      "password": {
+        "type": "password",
+        "name": "Your password",
+        "description": "Your password"
+      }
+    }
+  },
+  "methods": [{
+    "name": "End User Contact Update",
+    "description": "Monitor for changing contact information",
+    "kind": "event",
+    "zebricks": [{
+      "brick": "http",
+      "config": {
+        "sinceFormat": "iso8601",
+        "method": "GET",
+        "sinceResponse": "results.0.updated_at",
+        "sliceResponseBeforeDate": {
+          "date": "{{{since}}}",
+          "key": "updated_at"
+        },
+        "scopeResponse": "results",
+        "url": "https://{{auth.subdomain}}.zendesk.com/api/v2/search.json",
+        "auth": "{{auth.username}}:{{auth.password}}",
+        "query": {
+          "query": "type:user",
+          "sort_by": "updated_at",
+          "sort_order": "desc"
+        }
+      }
+    }, {
+      "brick": "custom",
+      "config": {
+        "method": "filterUsers"
+      }
+    }, {
+      "brick": "massage",
+      "config": {
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "User": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "path": ["id"]
+                  },
+                  "name": {
+                    "type": "string",
+                    "path": ["name"]
+                  },
+                  "email": {
+                    "type": "string",
+                    "path": ["email"]
+                  },
+                  "phone": {
+                    "type": "string",
+                    "path": ["phone"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }],
+    "output": {
+      "extensible": false,
+      "attributes": [{
+        "name": "User",
+        "attributes": [
+        {
+          "name": "id",
+          "type": "string"
+        }, {
+          "name": "name",
+          "type": "string"
+        }, {
+          "name": "email",
+          "type": "string"
+        }, {
+          "name": "phone",
+          "type": "string"
+        }]
+      }]
+    }
+  }, {
+    "name": "New ticket",
+    "description": "Monitor Zendesk for activity",
+    "kind": "event",
+    "zebricks": [{
+      "brick": "http",
+      "config": {
+        "sinceFormat": "iso8601",
+        "method": "GET",
+        "sinceResponse": "results.0.created_at",
+        "sliceResponseBeforeDate": {
+          "date": "{{{since}}}",
+          "key": "created_at"
+        },
+        "scopeResponse": "results",
+        "url": "https://{{auth.subdomain}}.zendesk.com/api/v2/search.json",
+        "auth": "{{auth.username}}:{{auth.password}}",
+        "query": {
+          "query": "{type:ticket created>={{since}}}",
+          "sort_by": "created_at",
+          "sort_order": "desc"
+        }
+      }
+    }, {
+      "brick": "custom",
+      "config": {
+        "method": "getTickets"
+      }
+    }],
+    "output": {
+      "extensible": false,
+      "attributes": [{
+        "name": "ticket",
+        "attributes": [{
+          "name": "id",
+          "type": "string"
+        }, {
+          "name": "url",
+          "type": "string"
+        }, {
+          "name": "subject",
+          "type": "string"
+        }, {
+          "name": "description",
+          "type": "string"
+        }, {
+          "name": "status",
+          "type": "string"
+        }]
+      }]
+    }
+  }, {
+    "name": "Create",
+    "kind": "action",
+    "description": "Create a record",
+    "zebricks": [{
+      "brick": "custom",
+      "config": {
+        "method": "getInputObject"
+      }
+    }, {
+      "brick": "http",
+      "config": {
+        "method": "POST",
+        "format": "json",
+        "scopeResponse": "{{params.type}}",
+        "wrapResponse": "OutputFields",
+        "url": "https://{{auth.subdomain}}.zendesk.com/api/v2/{{params.Endpoints}}.json",
+        "auth": "{{auth.username}}:{{auth.password}}",
+        "body": "{{#utils.unstringify}}prevData{{/utils.unstringify}}"
+      }
+    }],
+    "params": [{
+      "Endpoints": {
+        "type": "option",
+        "displayname": "Your Zendesk entities",
+        "choices": [
+          "First complete above step"
+        ],
+        "lookup": {
+          "channel": "zendesk",
+          "operation": "getEntities",
+          "key": "name",
+          "value": "name"
+        }
+      }
+    }],
+    "input": {
+      "extensible": false,
+      "attributes": [{
+        "name": "InputFields",
+        "attributes": [{
+          "metadata": "getTypeMetadata",
+          "config": "",
+          "data": {}
+        }]
+      }]
+    },
+    "output": {
+      "extensible": false,
+      "attributes": [{
+        "name": "OutputFields",
+        "attributes": [{
+          "name": "id",
+          "type": "string"
+        }, {
+          "name": "url",
+          "type": "string"
+        }]
+      }]
+    }
+  }, {
+    "name": "Update",
+    "kind": "action",
+    "description": "Update a record",
+    "zebricks": [{
+      "brick": "custom",
+      "config": {
+        "method": "getInputObject"
+      }
+    }, {
+      "brick": "http",
+      "config": {
+        "method": "PUT",
+        "format": "json",
+        "scopeResponse": "{{params.type}}",
+        "wrapResponse": "OutputFields",
+        "url": "https://{{auth.subdomain}}.zendesk.com/api/v2/{{params.Endpoints}}/{{input.RecordID.id}}.json",
+        "auth": "{{auth.username}}:{{auth.password}}",
+        "body": "{{#utils.unstringify}}prevData{{/utils.unstringify}}"
+      }
+    }],
+    "params": [{
+      "Endpoints": {
+        "type": "option",
+        "displayname": "Your Zendesk entities",
+        "choices": [
+          "First complete above step"
+        ],
+        "lookup": {
+          "channel": "zendesk",
+          "operation": "getEntities",
+          "key": "name",
+          "value": "name"
+        }
+      }
+    }],
+    "input": {
+      "extensible": false,
+      "attributes": [{
+        "name": "RecordID",
+        "attributes": [{
+          "name": "id",
+          "type": "string"
+        }]
+      }, {
+        "name": "InputFields",
+        "attributes": [{
+          "metadata": "getTypeMetadata",
+          "config": "",
+          "data": {}
+        }]
+      }]
+    },
+    "output": {
+      "extensible": false,
+      "attributes": [{
+        "name": "OutputFields",
+        "attributes": [{
+          "name": "id",
+          "type": "string"
+        }, {
+          "name": "url",
+          "type": "string"
+        }]
+      }]
+    }
+  }, {
+    "name": "Search",
+    "kind": "action",
+    "description": "Search for records",
+    "zebricks": [{
+      "brick": "custom",
+      "config": {
+        "method": "getInputObject"
+      }
+    }, {
+      "brick": "http",
+      "config": {
+        "method": "GET",
+        "format": "json",
+        "scopeResponse": "results.0",
+        "wrapResponse": "OutputFields",
+        "url": "https://{{auth.subdomain}}.zendesk.com/api/v2/search.json?query={type:{{params.type}}%20{{input.Search.term}}}",
+        "auth": "{{auth.username}}:{{auth.password}}"
+      }
+    }],
+    "params": [{
+      "Endpoints": {
+        "type": "option",
+        "displayname": "Your Zendesk entities",
+        "choices": [
+          "First complete above step"
+        ],
+        "lookup": {
+          "channel": "zendesk",
+          "operation": "getEntities",
+          "key": "name",
+          "value": "name"
+        }
+      }
+    }],
+    "input": {
+      "extensible": false,
+      "attributes": [{
+        "name": "Search",
+        "attributes": [{
+          "name": "term",
+          "type": "string"
+        }]
+      }]
+    },
+    "output": {
+      "extensible": false,
+      "attributes": [{
+        "name": "OutputFields",
+        "attributes": [{
+          "metadata": "getSearchFields",
+          "config": "",
+          "data": {}
+        }]
+      }]
+    }
+  }, {
+    "name": "getTypeMetadata",
+    "kind": "metadata",
+    "description": "Gets entity fields",
+    "zebricks": [{
+      "brick": "custom",
+      "config": {
+        "method": "getTypeMetadata",
+        "ticketfields": ["subject", "description", "requester_id", "assignee_id", "organization_id", "group_id", "type", "status", "due_at"],
+        "topicfields": ["title", "body", "submitter_id", "forum_id"],
+        "userfields": ["name", "role", "email", "organization_id", "phone"],
+        "orgfields": ["name", "shared_tickets", "shared_comments"]
+      }
+    }]
+  }, {
+    "name": "getSearchFields",
+    "kind": "metadata",
+    "description": "Gets entity fields",
+    "zebricks": [{
+      "brick": "custom",
+      "config": {
+        "method": "getTypeMetadata",
+        "ticketfields": ["id", "url", "subject", "description", "assignee_id", "organization_id", "group_id", "type", "status"],
+        "topicfields": ["id", "url", "title", "body", "submitter_id", "forum_id"],
+        "userfields": ["id", "url", "name", "role", "email", "organization_id", "phone"],
+        "orgfields": ["id", "url", "name", "shared_tickets", "shared_comments"]
+      }
+    }]
+  }, {
+    "name": "getEntities",
+    "kind": "metadata",
+    "description": "Gets entities",
+    "zebricks": [{
+      "brick": "custom",
+      "config": {
+        "method": "getEntities"
+      }
+    }]
+  }]
+}

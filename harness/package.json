@@ -1,0 +1,25 @@
+{
+  "name": "BrickHarness",
+  "company": "Azuqua, inc.",
+  "version": "0.0.1",
+  "description": "",
+  "private": true,
+  "main": "index",
+  "dependencies": {
+    "async": "*",
+    "js2xmlparser": "*",
+    "lodash": "*",
+    "oauth": "*",
+    "restjs": "git://github.com/kevinmctigue/restjs.git#master",
+    "zebricks": "git+ssh://git@github.com:azuqua/zebricks",
+    "common": "git+ssh://git@github.com:azuqua/common.git#master"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "chai": "*",
+    "nock": "*"
+  },
+  "engines": {
+    "node": "0.10.x"
+  }
+}

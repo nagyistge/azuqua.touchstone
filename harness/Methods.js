@@ -1,15 +1,16 @@
 "use strict";
 
-var channelName = 'zendesk'; // TODO
+//**************************************************
+// The biggest TODO: export only one function,
+// rather than one per each method name!
+//**************************************************
+
+var channelName = 'minizendesk'; // TODO
 
 var async = require('async'),
     zebricks = require('zebricks').bricks,
     channelJson = require('./'+channelName+'.json'),
     slice = Array.prototype.slice;
-
-/* Some things to note:
- * Bracket notation is used in several places to ensure the user can't break the system with bad var names...it should be sanitized anyway though
- */
 
 function checkin(result, methodName, brickIndex, brickName) {
   this.signal.emit(
@@ -24,9 +25,27 @@ function checkin(result, methodName, brickIndex, brickName) {
   );
 }
 
-function getMethods(channelJson){
-  // should map the method list to {methodName: bricklist} pairs
+function toCamelCase(spaceDelimitedString){
+  var camel = spaceDelimitedString
+    .split(" ")
+    .map(function(s){
+      return s[0].toUpperCase() + s.slice(1);
+    })
+    .join("");
+  return camel[0].toLowerCase() + camel.slice(1);
 }
+exports.toCamelCase = toCamelCase;
+
+function extractMethods(channelJson){
+  // should map the method list to {methodName: bricklist} pairs
+  var ret = {};
+  channelJson.methods.forEach(function(method){
+    var name = toCamelCase(method.name);
+    ret[name] = method.zebricks;
+  });
+  return ret;
+}
+exports.extractMethods = extractMethods;
 
 function onBrickFinish(methodName, brickIndex, brickName, allData, sinceObject) {
   var otherArgs = slice.call(arguments, 5),
@@ -46,29 +65,38 @@ function onBrickFinish(methodName, brickIndex, brickName, allData, sinceObject) 
  * End User Contact Update: Monitor for changing contact information
  * kind: event
  */
-channelJson.methods.forEach(function(methodName){
-  exports[methodName] = function(trigger, sinceObject, callback) {
-    var self = this,
-        monitorMethod = this.monitor.submethod, // monitorMethod is something like 'stop' and methodName is the actual name
-        methodBricks = getMethods(channelJson)[methodName] || {},
-        brickList = Array.isArray(methodBricks) ? methodBricks : methodBricks[monitorMethod],
-        brickSteps = [],
-        allData = [];
+var callMethod = function(methodName, trigger, sinceObject, callback) {
+  var extractedMethods = extractMethods(channelJson);
 
-    if (!Array.isArray(brickList)) return callback(new Error('Method "' + monitorMethod + '" is not supported for operation'+methodName));
+  //TODO: check that methodName exists in the channel
+  if (extractedMethods[methodName] === undefined) {
+    return callback(new Error(channelName+"."+methodName+" is not a valid operation"));
+  }
+  // if (!MainAdapter[operation]) return callback(new Error(TRACE_PREFIX + operation + ' is not a valid operation'));
 
-    function makeBrickSteps(brickConfig, i) {
-      var brickName = brickConfig.brick,
-          brickModule = zebricks[brickName],
-          clonedConfig = JSON.parse(JSON.stringify(brickConfig.config));
+  var self = this,
+      // monitorMethod is something like 'stop'; methodName is the actual name
+      monitorMethod = this.monitor.submethod,
+      methodBricks = extractedMethods[methodName] || {},
+      brickList = Array.isArray(methodBricks) ? methodBricks : methodBricks[monitorMethod],
+      brickSteps = [],
+      allData = [];
 
-      brickSteps.push((brickModule[monitorMethod] || brickModule.monitor).bind(self, clonedConfig, trigger, allData, sinceObject));
-      brickSteps.push(onBrickFinish.bind(self, methodName, i, brickName, allData, sinceObject));
-    }
+  if (!Array.isArray(brickList)) return callback(new Error('Method "' + monitorMethod + '" is not supported for operation '+methodName));
 
-    brickList.forEach(makeBrickSteps);
-    async.waterfall(brickSteps, function(err) {
-      callback(err, allData[allData.length - 1],sinceObject); });
-  };
+  function makeBrickSteps(brickConfig, i) {
+    var brickName = brickConfig.brick,
+        brickModule = zebricks[brickName],
+        clonedConfig = JSON.parse(JSON.stringify(brickConfig.config));
 
-});
+    brickSteps.push((brickModule[monitorMethod] || brickModule.monitor)
+      .bind(self, clonedConfig, trigger, allData, sinceObject));
+
+    brickSteps.push(onBrickFinish.bind(self, methodName, i, brickName, allData, sinceObject));
+  }
+
+  brickList.forEach(makeBrickSteps);
+  async.waterfall(brickSteps, function(err) {
+    callback(err, allData[allData.length - 1],sinceObject); });
+};
+exports.callMethod = callMethod;

@@ -1,0 +1,142 @@
+{
+  "name": "Zendesk",
+  "description": "Zendesk Channel",
+  "version": "0.3.2",
+  "creator": {
+    "name": "Azuqua",
+    "url": "/market/azuqua"
+  },
+  "type": "channel",
+  "recurrence": 1,
+  "dependencies": {
+  },
+  "auth": {
+    "type": "basic",
+    "authparams": {
+      "subdomain": {
+        "type": "string",
+        "name": "Zendesk subdomain",
+        "description": "Your Zendesk subdomain"
+      },
+      "username": {
+        "type": "string",
+        "name": "Email address",
+        "description": "Your user email"
+      },
+      "password": {
+        "type": "password",
+        "name": "Your password",
+        "description": "Your password"
+      }
+    }
+  },
+  "methods": [{
+    "name": "Test Event",
+    "kind": "event",
+    "zebricks": [{
+      "brick": "custom",
+      "config": {
+        "method": "createData"
+      }
+    }, {
+      "brick": "custom",
+      "config": {
+        "method": "log"
+      }
+    }],
+    "output": {
+      "extensible": false,
+      "attributes": [{
+        "name": "Data",
+        "attributes": [
+        {
+          "name": "mydata",
+          "type": "string"
+        }]
+      }]
+    }
+  },
+  {
+    "name": "End User Contact Update",
+    "description": "Monitor for changing contact information",
+    "kind": "event",
+    "zebricks": [{
+      "brick": "http",
+      "config": {
+        "method": "GET",
+        "url": "http://fake.azuqua.com/users/1"
+      }
+    }],
+    "output": {
+      "extensible": false,
+      "attributes": [{
+        "name": "User",
+        "attributes": [
+        {
+          "name": "id",
+          "type": "string"
+        }, {
+          "name": "name",
+          "type": "string"
+        }, {
+          "name": "email",
+          "type": "string"
+        }, {
+          "name": "phone",
+          "type": "string"
+        }]
+      }]
+    }
+  }, {
+    "name": "Create",
+    "kind": "action",
+    "description": "Create a record",
+    "zebricks": [{
+      "brick": "http",
+      "config": {
+        "method": "POST",
+        "url": "http://fake.azuqua.com/users/1",
+        "body": "HELLO THIS IS DATA"
+      }
+    }],
+    "params": [{
+      "Endpoints": {
+        "type": "option",
+        "displayname": "Your Zendesk entities",
+        "choices": [
+          "First complete above step"
+        ],
+        "lookup": {
+          "channel": "zendesk",
+          "operation": "getEntities",
+          "key": "name",
+          "value": "name"
+        }
+      }
+    }],
+    "input": {
+      "extensible": false,
+      "attributes": [{
+        "name": "InputFields",
+        "attributes": [{
+          "metadata": "getTypeMetadata",
+          "config": "",
+          "data": {}
+        }]
+      }]
+    },
+    "output": {
+      "extensible": false,
+      "attributes": [{
+        "name": "OutputFields",
+        "attributes": [{
+          "name": "id",
+          "type": "string"
+        }, {
+          "name": "url",
+          "type": "string"
+        }]
+      }]
+    }
+  }]
+}
