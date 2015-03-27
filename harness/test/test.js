@@ -3,13 +3,19 @@ var zebricks = require('zebricks').bricks,
 
 require('chai').should();
 
-var M = require('../Methods');
 var C = require('../ChannelObj');
+var utils = require('../utils');
+
+function loadChannel(channelName) {
+  // works with 'require' now for testing;
+  // will be changed to a database call or something later
+  return utils.extractMethods(require('./'+channelName+'.json'));
+}
 
 describe("converting channel json to a list of methods", function() {
 
   it("takes a channel JSON file and returns a methods object", function(){
-    M.extractMethods(require('../minizendesk.json')).should.deep.equal(
+    utils.extractMethods(require('../minizendesk.json')).should.deep.equal(
 
       {
         "endUserContactUpdate": [
@@ -22,11 +28,6 @@ describe("converting channel json to a list of methods", function() {
             "brick": "custom",
             "config": {
               "method": "createData"
-            }
-          }, {
-            "brick": "custom",
-            "config": {
-              "method": "log"
             }
           }],
     "create": [
@@ -50,7 +51,7 @@ describe("calling a method", function(){
         trigger = {},
         sinceObject = {};
 
-    M.callMethod(method,trigger,sinceObject, function(err, data){
+    utils.callMethod(method,trigger,sinceObject, function(err, data){
       (function(){throw err;})
         .should.throw(Error);
       done();
@@ -59,7 +60,7 @@ describe("calling a method", function(){
 });
 
 describe("the Channel class", function(){
-  it("can call the nop zebrick", function(done){
+  it("can be passed in when calling the nop zebrick", function(done){
     var input = ["HELLO THIS IS DATA"],
         newChannel = new C(),
         clonedConfig = {},
@@ -78,25 +79,35 @@ describe("the Channel class", function(){
     });
   });
 
-  it("monitor.listen returns data from a brick", function(done){
-    var newChannel = new C(),
+  it("channel.listen returns data from a brick", function(done){
+    var newChannel = new C({}, {}, {}, loadChannel('../minizendesk')),
         trigger = {"_operation": "testEvent"},
         since = {"since": new Date()};
-    newChannel.listen(trigger, since, function(err, self, output, since){
+    newChannel.listen(trigger, since, function(err, context, output, since){
       if (err) { throw err; }
       output.should.equal("HELLO THIS IS DATA");
       done();
     });
   });
 
-  it("monitor.listen keeps context (auth, dirname, monitor, floData)", function(done){
-    var newChannel = new C(),
+  it("channel.listen keeps context (auth, dirname, monitor, floData)", function(done){
+    var newChannel = new C({}, {}, {}, loadChannel('../minizendesk')),
         trigger = {"_operation": "testEvent"},
-        since = {"since": new Date()};
-    newChannel.listen(trigger, since, function(err, self, output, since){
-      if (err) { throw err; }
-      console.log(self, output, since);
+        now = new Date(),
+        since = {"since": now},
+        expectedContext = {
+          "auth": {},
+          "monitor": {},
+          "floData": {},
+          "dirname": "/Users/azu-lito/ChannelTesting/testing_framework/harness"
+        };
+    newChannel.listen(trigger, since, function(err, context, output, since){
+      // Stringified because that discards instance methods, which otherwise
+      // would ruin the comparison
+      JSON.stringify(context).should.deep.equal(JSON.stringify(expectedContext));
+      since.should.deep.equal({"since": now });
       output.should.equal("HELLO THIS IS DATA");
+      if (err) { throw err; }
       done();
     });
   });

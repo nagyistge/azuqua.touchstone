@@ -38,11 +38,6 @@
       "config": {
         "method": "createData"
       }
-    }, {
-      "brick": "custom",
-      "config": {
-        "method": "log"
-      }
     }],
     "output": {
       "extensible": false,

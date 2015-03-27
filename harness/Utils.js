@@ -1,10 +1,5 @@
 "use strict";
 
-//**************************************************
-// The biggest TODO: export only one function,
-// rather than one per each method name!
-//**************************************************
-
 var channelName = 'minizendesk'; // TODO
 
 var async = require('async'),
@@ -37,7 +32,7 @@ function toCamelCase(spaceDelimitedString){
 exports.toCamelCase = toCamelCase;
 
 function extractMethods(channelJson){
-  // should map the method list to {methodName: bricklist} pairs
+  // Moves
   var ret = {};
   channelJson.methods.forEach(function(method){
     var name = toCamelCase(method.name);
@@ -68,11 +63,9 @@ function onBrickFinish(methodName, brickIndex, brickName, allData, sinceObject) 
 var callMethod = function(methodName, trigger, sinceObject, callback) {
   var extractedMethods = extractMethods(channelJson);
 
-  //TODO: check that methodName exists in the channel
   if (extractedMethods[methodName] === undefined) {
     return callback(new Error(channelName+"."+methodName+" is not a valid operation"));
   }
-  // if (!MainAdapter[operation]) return callback(new Error(TRACE_PREFIX + operation + ' is not a valid operation'));
 
   var self = this,
       // monitorMethod is something like 'stop'; methodName is the actual name
