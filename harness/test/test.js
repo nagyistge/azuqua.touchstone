@@ -62,12 +62,12 @@ describe("calling a method", function(){
 describe("the Channel class", function(){
   it("can be passed in when calling the nop zebrick", function(done){
     var input = ["HELLO THIS IS DATA"],
-        newChannel = new C(),
+        card = C.createCard({}, {}, {}),
         clonedConfig = {},
         trigger = {},
         sinceObject = {};
 
-    var callable = zebricks.nop.monitor.bind(newChannel,
+    var callable = zebricks.nop.monitor.bind(card,
                                          clonedConfig,
                                          trigger,
                                          input,
@@ -80,10 +80,10 @@ describe("the Channel class", function(){
   });
 
   it("channel.listen returns data from a brick", function(done){
-    var newChannel = new C({}, {}, {}, loadChannel('../minizendesk')),
+    var card = C.createCard({}, {}, {}),
         trigger = {"_operation": "testEvent"},
         since = {"since": new Date()};
-    newChannel.listen(trigger, since, function(err, context, output, since){
+    C.listen.call(card, trigger, since, function(err, context, output, since){
       if (err) { throw err; }
       output.should.equal("HELLO THIS IS DATA");
       done();
@@ -91,7 +91,7 @@ describe("the Channel class", function(){
   });
 
   it("channel.listen keeps context (auth, dirname, monitor, floData)", function(done){
-    var newChannel = new C({}, {}, {}, loadChannel('../minizendesk')),
+    var card = C.createCard({}, {}, {}),
         trigger = {"_operation": "testEvent"},
         now = new Date(),
         since = {"since": now},
@@ -101,7 +101,7 @@ describe("the Channel class", function(){
           "floData": {},
           "dirname": "/Users/azu-lito/ChannelTesting/testing_framework/harness"
         };
-    newChannel.listen(trigger, since, function(err, context, output, since){
+    C.listen.call(card, trigger, since, function(err, context, output, since){
       // Stringified because that discards instance methods, which otherwise
       // would ruin the comparison
       JSON.stringify(context).should.deep.equal(JSON.stringify(expectedContext));

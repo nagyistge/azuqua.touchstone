@@ -12,12 +12,16 @@ var path = require('path'),
     utils = require('./utils'),
     slice = Array.prototype.slice;
 
-function Card(auth, monitor, floData) {
-  this.auth = auth || {};
-  this.monitor = monitor || {};
-  this.floData = floData;
-  this.dirname = path.resolve(__dirname); //TODO
+function createCard(auth, monitor, floData) {
+  var ret = {
+    "auth":  auth || {},
+    "monitor":  monitor || {},
+    "floData":  floData,
+    "dirname": path.resolve(__dirname)// TODO
+  };
+  return ret;
 }
+module.exports.createCard = createCard;
 
 function floInvokeResponse(err) {
   //if (err) log.error(TRACE_PREFIX + 'flo.invoke: ' + err);
@@ -87,7 +91,7 @@ var callMethod = function(methodName, trigger, sinceObject, callback) {
     callback(err, allData[allData.length - 1],sinceObject); });
 };
 
-Card.prototype.listen = function(trigger, since, callback) {
+var listen = function(trigger, since, callback) {
   var self = this,
       floData = this.floData,
       sinceObject = { since: since },
@@ -109,4 +113,4 @@ Card.prototype.listen = function(trigger, since, callback) {
 
   callMethod.call(this, operation, trigger, sinceObject, onResponse);
 };
-module.exports = Card;
+module.exports.listen = listen;
