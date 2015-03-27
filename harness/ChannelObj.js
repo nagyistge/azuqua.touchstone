@@ -1,31 +1,25 @@
 "use strict";
-
 var TRACE_PREFIX = 'Channel.listen: ';
-
-var channelName = 'minizendesk'; // TODO: parameterize
 
 //Our top-level variables
 var path = require('path'),
     zebricks = require('zebricks').bricks,
     async = require('async'),
-    channelJson = require('./'+channelName+'.json'),
     utils = require('./utils'),
     slice = Array.prototype.slice;
 
-function createCard(auth, monitor, floData) {
+function createCard(auth, monitor, floData, channelName, channelMethodsReference) {
   var ret = {
     "auth":  auth || {},
     "monitor":  monitor || {},
     "floData":  floData,
-    "dirname": path.resolve(__dirname)// TODO
+    "dirname": path.resolve(__dirname),// TODO
+    "channelName": channelName,
+    "methodsRef": channelMethodsReference,
   };
   return ret;
 }
 module.exports.createCard = createCard;
-
-function floInvokeResponse(err) {
-  //if (err) log.error(TRACE_PREFIX + 'flo.invoke: ' + err);
-}
 
 function checkin(result, methodName, brickIndex, brickName) {
   this.signal.emit(
@@ -40,6 +34,12 @@ function checkin(result, methodName, brickIndex, brickName) {
   );
 }
 
+// Note that all of the *this* references and use of *bind* and *call* 
+// are from a distant past when all was object-oriented and bunches of new 
+// objects were nonchanantly created for each card execution. As hacky as this 
+// currently is, zebricks relies there being certain properties on an 
+// object's *this*, so please keep this code intact until we finally make 
+// a system-wide change. -L
 function onBrickFinish(methodName, brickIndex, brickName, allData, sinceObject) {
   var otherArgs = slice.call(arguments, 5),
       next = otherArgs.pop(), // next = callback to run the next brick in the waterfall
@@ -53,22 +53,20 @@ function onBrickFinish(methodName, brickIndex, brickName, allData, sinceObject) 
   next(null);
 }
 
+var callMethod = function(trigger, sinceObject, callback) {
+  var methods = this.methodsRef,
+      channelName = this.channelName,
+      methodName = trigger._operation;
 
-/**
- * End User Contact Update: Monitor for changing contact information
- * kind: event
- */
-var callMethod = function(methodName, trigger, sinceObject, callback) {
-  var extractedMethods = utils.extractMethods(channelJson);
-
-  if (extractedMethods[methodName] === undefined) {
+  console.log("METHODS", methods, "CHNAME", channelName, "METHODNAME", methodName);
+  if (methods[methodName] === undefined) {
     return callback(new Error(channelName+"."+methodName+" is not a valid operation"));
   }
 
   var self = this,
       // monitorMethod is something like 'stop'; methodName is the actual name
       monitorMethod = this.monitor.submethod,
-      methodBricks = extractedMethods[methodName] || {},
+      methodBricks = methods[methodName] || {},
       brickList = Array.isArray(methodBricks) ? methodBricks : methodBricks[monitorMethod],
       brickSteps = [],
       allData = [];
@@ -91,7 +89,7 @@ var callMethod = function(methodName, trigger, sinceObject, callback) {
     callback(err, allData[allData.length - 1],sinceObject); });
 };
 
-var listen = function(trigger, since, callback) {
+var execCard = function(trigger, since, callback) {
   var self = this,
       floData = this.floData,
       sinceObject = { since: since },
@@ -111,6 +109,6 @@ var listen = function(trigger, since, callback) {
 
   if (callback.signal) this.signal = callback.signal;
 
-  callMethod.call(this, operation, trigger, sinceObject, onResponse);
+  callMethod.call(this, trigger, sinceObject, onResponse);
 };
-module.exports.listen = listen;
+module.exports.execCard = execCard;

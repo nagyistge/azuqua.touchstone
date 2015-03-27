@@ -79,11 +79,11 @@ describe("the Channel class", function(){
     });
   });
 
-  it("channel.listen returns data from a brick", function(done){
-    var card = C.createCard({}, {}, {}),
+  it.only("channel.listen returns data from a brick", function(done){
+    var card = C.createCard({}, {}, {}, 'zendesk', loadChannel('../minizendesk')),
         trigger = {"_operation": "testEvent"},
         since = {"since": new Date()};
-    C.listen.call(card, trigger, since, function(err, context, output, since){
+    C.execCard.call(card, trigger, since, function(err, context, output, since){
       if (err) { throw err; }
       output.should.equal("HELLO THIS IS DATA");
       done();
@@ -101,7 +101,7 @@ describe("the Channel class", function(){
           "floData": {},
           "dirname": "/Users/azu-lito/ChannelTesting/testing_framework/harness"
         };
-    C.listen.call(card, trigger, since, function(err, context, output, since){
+    C.execCard.call(card, trigger, since, function(err, context, output, since){
       // Stringified because that discards instance methods, which otherwise
       // would ruin the comparison
       JSON.stringify(context).should.deep.equal(JSON.stringify(expectedContext));
