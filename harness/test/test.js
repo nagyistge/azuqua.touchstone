@@ -59,27 +59,8 @@ describe("calling a method", function(){
   });
 });
 
-describe("the Channel class", function(){
-  it("can be passed in when calling the nop zebrick", function(done){
-    var input = ["HELLO THIS IS DATA"],
-        card = C.createCard({}, {}, {}),
-        clonedConfig = {},
-        trigger = {},
-        sinceObject = {};
-
-    var callable = zebricks.nop.monitor.bind(card,
-                                         clonedConfig,
-                                         trigger,
-                                         input,
-                                         sinceObject);
-
-    callable(function(err, data){
-      data.should.equal(input[input.length-1]);
-      done();
-    });
-  });
-
-  it.only("channel.listen returns data from a brick", function(done){
+describe("executing a card", function(){
+  it("execCard returns data from a brick", function(done){
     var card = C.createCard({}, {}, {}, 'zendesk', loadChannel('../minizendesk')),
         trigger = {"_operation": "testEvent"},
         since = {"since": new Date()};
@@ -90,8 +71,8 @@ describe("the Channel class", function(){
     });
   });
 
-  it("channel.listen keeps context (auth, dirname, monitor, floData)", function(done){
-    var card = C.createCard({}, {}, {}),
+  it("execCard keeps context (auth, dirname, monitor, floData)", function(done){
+    var card = C.createCard({}, {}, {}, 'zendesk', loadChannel('../minizendesk')),
         trigger = {"_operation": "testEvent"},
         now = new Date(),
         since = {"since": now},

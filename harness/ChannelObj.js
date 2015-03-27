@@ -1,25 +1,29 @@
+// Exports two functions:
+// createCard(auth, monitor, floData, channelName, channelMethodsReference)
+// and
+// execCard(trigger, since, callback).
+// you MUST call execCard with `execCard.call(card, trigger, since, callback)`
+// because zebricks expect a *this* with the properties of `card`
 "use strict";
 var TRACE_PREFIX = 'Channel.listen: ';
 
-//Our top-level variables
 var path = require('path'),
     zebricks = require('zebricks').bricks,
     async = require('async'),
-    utils = require('./utils'),
     slice = Array.prototype.slice;
 
+// ! Warning: Legacy code ahead !
 function createCard(auth, monitor, floData, channelName, channelMethodsReference) {
   var ret = {
     "auth":  auth || {},
     "monitor":  monitor || {},
     "floData":  floData,
-    "dirname": path.resolve(__dirname),// TODO
+    "dirname": path.resolve(__dirname),
     "channelName": channelName,
     "methodsRef": channelMethodsReference,
   };
   return ret;
 }
-module.exports.createCard = createCard;
 
 function checkin(result, methodName, brickIndex, brickName) {
   this.signal.emit(
@@ -42,8 +46,10 @@ function checkin(result, methodName, brickIndex, brickName) {
 // a system-wide change. -L
 function onBrickFinish(methodName, brickIndex, brickName, allData, sinceObject) {
   var otherArgs = slice.call(arguments, 5),
-      next = otherArgs.pop(), // next = callback to run the next brick in the waterfall
-      storeData = otherArgs[0]; // Any data passed from the brick that we just ran and want to store
+      // next = callback to run the next brick in the waterfall
+      next = otherArgs.pop(),
+      // Any data passed from the brick that we just ran and want to store
+      storeData = otherArgs[0];
 
   allData[brickIndex] = storeData;
   // Was the since changed? If not, put it back to the last one.
@@ -58,7 +64,6 @@ var callMethod = function(trigger, sinceObject, callback) {
       channelName = this.channelName,
       methodName = trigger._operation;
 
-  console.log("METHODS", methods, "CHNAME", channelName, "METHODNAME", methodName);
   if (methods[methodName] === undefined) {
     return callback(new Error(channelName+"."+methodName+" is not a valid operation"));
   }
@@ -95,7 +100,11 @@ var execCard = function(trigger, since, callback) {
       sinceObject = { since: since },
       operation = (typeof trigger === 'string') ? trigger : trigger._operation;
 
-  if (!operation) return callback(new Error(TRACE_PREFIX + 'An operation is required'));
+  if (!operation) {
+    return callback(
+      new Error(this.channelName + 'execCard: an operation is required')
+    );
+  }
 
   function onResponse(err, outputs, updatedSinceObject) {
     if (err) return callback(err);
@@ -111,4 +120,6 @@ var execCard = function(trigger, since, callback) {
 
   callMethod.call(this, trigger, sinceObject, onResponse);
 };
+
+module.exports.createCard = createCard;
 module.exports.execCard = execCard;
