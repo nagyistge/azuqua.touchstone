@@ -5,11 +5,11 @@
 // you MUST call execCard with `execCard.call(card, trigger, since, callback)`
 // because zebricks expect a *this* with the properties of `card`
 "use strict";
-var TRACE_PREFIX = 'Channel.listen: ';
+var TRACE_PREFIX = "Channel.listen: ";
 
-var path = require('path'),
-    zebricks = require('zebricks').bricks,
-    async = require('async'),
+var path = require("path"),
+    zebricks = require("zebricks").bricks,
+    async = require("async"),
     slice = Array.prototype.slice;
 
 // ! Warning: Legacy code ahead !
@@ -26,9 +26,11 @@ function createCard(auth, monitor, floData, channelName, channelMethodsReference
 }
 
 function checkin(result, methodName, brickIndex, brickName) {
+  /*jshint validthis:true */
+
   this.signal.emit(
     this.signal._channelKey,
-    'log',
+    "log",
     {
       brickIndex: brickIndex,
       brickName: brickName,
@@ -42,9 +44,11 @@ function checkin(result, methodName, brickIndex, brickName) {
 // are from a distant past when all was object-oriented and bunches of new 
 // objects were nonchanantly created for each card execution. As hacky as this 
 // currently is, zebricks relies there being certain properties on an 
-// object's *this*, so please keep this code intact until we finally make 
+// object"s *this*, so please keep this code intact until we finally make 
 // a system-wide change. -L
 function onBrickFinish(methodName, brickIndex, brickName, allData, sinceObject) {
+  /*jshint validthis:true */
+
   var otherArgs = slice.call(arguments, 5),
       // next = callback to run the next brick in the waterfall
       next = otherArgs.pop(),
@@ -69,14 +73,14 @@ var callMethod = function(trigger, sinceObject, callback) {
   }
 
   var self = this,
-      // monitorMethod is something like 'stop'; methodName is the actual name
+      // monitorMethod is something like "stop"; methodName is the actual name
       monitorMethod = this.monitor.submethod,
       methodBricks = methods[methodName] || {},
       brickList = Array.isArray(methodBricks) ? methodBricks : methodBricks[monitorMethod],
       brickSteps = [],
       allData = [];
 
-  if (!Array.isArray(brickList)) return callback(new Error('Method "' + monitorMethod + '" is not supported for operation '+methodName));
+  if (!Array.isArray(brickList)) return callback(new Error("Method '" + monitorMethod + "' is not supported for operation "+methodName));
 
   function makeBrickSteps(brickConfig, i) {
     var brickName = brickConfig.brick,
@@ -98,11 +102,11 @@ var execCard = function(trigger, since, callback) {
   var self = this,
       floData = this.floData,
       sinceObject = { since: since },
-      operation = (typeof trigger === 'string') ? trigger : trigger._operation;
+      operation = (typeof trigger === "string") ? trigger : trigger._operation;
 
   if (!operation) {
     return callback(
-      new Error(this.channelName + 'execCard: an operation is required')
+      new Error(this.channelName + "execCard: an operation is required")
     );
   }
 

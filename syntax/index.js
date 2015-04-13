@@ -1,5 +1,3 @@
-var stream = require('stream'),
-    mocha = require('mocha');
 var channel_has_properties = require('./test/channel');
 
 module.exports = function(channelText, isExternal){
