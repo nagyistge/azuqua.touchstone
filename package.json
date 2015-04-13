@@ -1,19 +1,23 @@
 {
-  "name": "Touchstone",
-  "version": "1.0.0",
-  "description": "Touchstone ==========",
-  "main": "verification_example.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+"name": "ChannelVerification",
+"company": "Azuqua, inc.",
+"version": "0.0.1",
+"description": "",
+"private": true,
+"main": "index",
+"devDependencies": {},
+"dependencies": {
+    "async": "*",
+    "chai": "*",
+    "leche": "*",
+    "mocha": "*",
+    "schema-is-schema": "^1.2.2"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/azuqua/touchstone.git"
+    "url": "https://github.com/azuqua/modules#lito/vnext"
   },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/azuqua/touchstone/issues"
-  },
-  "homepage": "https://github.com/azuqua/touchstone"
+    "engines": {
+      "node": "0.10.x"
+  }
 }
