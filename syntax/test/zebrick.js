@@ -21,6 +21,16 @@ function valid_brick(brickname) {
       return true;
     case "webhook":
       return true;
+    case "wrap":
+      return true;
+    case "scope":
+      return true;
+    case "dateslice":
+      return true;
+    case "paginate":
+      return true;
+    case "nop":
+      return true;
     default:
       return false;
   }
